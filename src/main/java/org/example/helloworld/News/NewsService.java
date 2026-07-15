@@ -10,7 +10,7 @@ import java.util.Optional;
 @Service
 public class NewsService {
 
-    private NewsRepository Newsrepository;
+    private final NewsRepository Newsrepository;
     public NewsService(NewsRepository NewsRepository) {
         this.Newsrepository = NewsRepository;
     }

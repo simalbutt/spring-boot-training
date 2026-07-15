@@ -7,8 +7,6 @@
         http://www.liquibase.org/xml/ns/dbchangelog
         https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
 
-    <include file="001-create-students.xml" relativeToChangelogFile="true"/>
-    <include file="002-insert-students.xml" relativeToChangelogFile="true"/>
     <include file="003-create-news.xml" relativeToChangelogFile="true"/>
     <include file="004-create-newsmedia.xml" relativeToChangelogFile="true"/>
 

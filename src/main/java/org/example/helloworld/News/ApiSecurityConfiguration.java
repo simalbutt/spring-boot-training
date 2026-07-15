@@ -18,7 +18,7 @@ public class ApiSecurityConfiguration {
                 .requestMatchers(HttpMethod.POST,"/api/v1/news","/api/v1/news/**").hasAnyRole("reporter","editor")
                 .requestMatchers(HttpMethod.DELETE,"/api/v1/news/**").hasAnyRole("editor")
                         .requestMatchers(HttpMethod.PUT,"/api/v1/news/**").hasAnyRole("reporter")
-                        .anyRequest().hasAnyRole("admin"))
+                        .anyRequest().hasRole("reporter"))
                 .formLogin(config ->{
                 }).csrf(AbstractHttpConfigurer::disable);
         return http.build();

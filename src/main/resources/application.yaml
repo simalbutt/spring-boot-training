@@ -42,7 +42,10 @@ management:
         otlp:
           endpoint: http://localhost:4318/v1/traces
 
-
 logging:
   level:
     sql: debug
+
+app:
+  message:
+    welcome: hello from application

@@ -13,11 +13,8 @@ public class NewsMedia {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
-
     private String fileName;
-
     private String fileType;
-
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "news_id")
     @JsonBackReference
