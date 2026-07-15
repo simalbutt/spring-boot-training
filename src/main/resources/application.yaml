@@ -1,0 +1,48 @@
+spring:
+  application:
+    name: helloworld
+
+  jpa:
+    open-in-view: false
+    hibernate:
+      ddl-auto: none
+
+  security:
+    user:
+      name: reporter
+      password: reporter
+      roles: reporter
+
+
+  liquibase:
+    change-log: classpath:db/changelog/db.changelog-master.xml
+
+server:
+  port: 8081
+
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: "*"
+  tracing:
+    sampling:
+      probability: 1.0
+    export:
+      otlp:
+        enabled: true
+  otlp:
+    metrics:
+      export:
+        enabled: false
+  opentelemetry:
+    tracing:
+      export:
+        otlp:
+          endpoint: http://localhost:4318/v1/traces
+
+
+logging:
+  level:
+    sql: debug
