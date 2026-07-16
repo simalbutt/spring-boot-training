@@ -17,6 +17,8 @@
 
             <column name="title" type="VARCHAR(100)"/>
 
+            <column name="reported_by" type="VARCHAR(100)"/>
+
             <column name="content" type="VARCHAR(500)"/>
 
             <column name="created_date" type="TIMESTAMP"/>

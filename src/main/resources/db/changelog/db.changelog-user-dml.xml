@@ -31,7 +31,6 @@
         </insert>
 
 
-
         <insert tableName="users">
 
             <column name="username"
