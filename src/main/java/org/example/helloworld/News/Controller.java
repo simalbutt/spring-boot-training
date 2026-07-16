@@ -46,6 +46,7 @@ public class Controller {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(newsService.create(news));
     }
+
     @PreAuthorize("hasRole('REPORTER')")
     @PutMapping("/{id}")
     public ResponseEntity<News> update(@PathVariable("id") long id ,@RequestBody News news) {

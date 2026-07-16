@@ -7,11 +7,11 @@ spring:
     hibernate:
       ddl-auto: none
 
-  security:
-    user:
-      name: reporter
-      password: reporter
-      roles: REPORTER
+#  security:
+#    user:
+#      name: reporter
+#      password: reporter
+#      roles: REPORTER
 
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.xml
@@ -44,6 +44,7 @@ management:
 logging:
   level:
     sql: debug
+    org.springframework.security: debug
 
 app:
   message:

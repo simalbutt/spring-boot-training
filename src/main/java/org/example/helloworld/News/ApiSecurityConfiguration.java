@@ -7,6 +7,8 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configurers.AbstractHttpConfigurer;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
+import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
 
 @Configuration
 @EnableMethodSecurity
@@ -20,10 +22,17 @@ public class ApiSecurityConfiguration {
 //                .requestMatchers(HttpMethod.POST,"/api/v1/news","/api/v1/news/**").hasAnyRole("reporter","editor")
 //                .requestMatchers(HttpMethod.DELETE,"/api/v1/news/**").hasAnyRole("editor")
 //                        .requestMatchers(HttpMethod.PUT,"/api/v1/news/**").hasAnyRole("reporter")
-                        .anyRequest().hasRole("REPORTER")
+                        .anyRequest().authenticated()
                 )
                 .formLogin(config ->{
-                }).csrf(AbstractHttpConfigurer::disable);
+                }) .csrf(csrf -> csrf
+                        .csrfTokenRepository(
+                                CookieCsrfTokenRepository.withHttpOnlyFalse()
+                        )
+                        .csrfTokenRequestHandler(
+                                new CsrfTokenRequestAttributeHandler()
+                        )
+                );
         return http.build();
 
     }
