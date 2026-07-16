@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<databaseChangeLog
+        xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+        xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+        xsi:schemaLocation="
+        http://www.liquibase.org/xml/ns/dbchangelog
+        https://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+
+    <changeSet id="3" author="news">
+
+        <insert tableName="news">
+            <column name="title" value="Spring Boot 4 Released"/>
+            <column name="content" value="Spring Boot 4 introduces several new features and improvements."/>
+            <column name="created_date" valueDate="2026-07-16T09:00:00"/>
+        </insert>
+
+        <insert tableName="news">
+            <column name="title" value="Liquibase Migration"/>
+            <column name="content" value="Liquibase helps manage database schema changes efficiently."/>
+            <column name="created_date" valueDate="2026-07-16T10:30:00"/>
+        </insert>
+
+        <insert tableName="news">
+            <column name="title" value="OpenTelemetry Integration"/>
+            <column name="content" value="Distributed tracing has been enabled using OpenTelemetry and Jaeger."/>
+            <column name="created_date" valueDate="2026-07-16T11:15:00"/>
+        </insert>
+
+    </changeSet>
+
+</databaseChangeLog>

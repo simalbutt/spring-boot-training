@@ -9,5 +9,6 @@
 
     <include file="003-create-news.xml" relativeToChangelogFile="true"/>
     <include file="004-create-newsmedia.xml" relativeToChangelogFile="true"/>
+    <include file="db.insert-news-dml.xml" relativeToChangelogFile="true"/>
 
 </databaseChangeLog>
