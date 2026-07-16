@@ -11,8 +11,7 @@ spring:
     user:
       name: reporter
       password: reporter
-      roles: reporter
-
+      roles: REPORTER
 
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.xml
