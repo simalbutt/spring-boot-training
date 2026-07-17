@@ -5,8 +5,8 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
-
 import java.util.Optional;
+import java.util.UUID;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -27,5 +27,20 @@ public class UserService implements UserDetailsService {
         return User.withUsername(username).password(user.get().getPassword())
                 .authorities("ROLE_" + user.get().getRole()).build();
 
+    }
+
+    public  user generateToken(String username) {
+        user user1= userRepository.findByUsername(username)
+                .orElseThrow(() -> new UsernameNotFoundException(username));
+        user1.setToken(UUID.randomUUID().toString());
+        return userRepository.save(user1);
+    }
+
+    public user findByToken(String token) {
+        Optional<user> user = userRepository.findByToken(token);
+        if(user.isEmpty()) {
+            throw new UsernameNotFoundException(token);
+        }
+        return user.get();
     }
 }

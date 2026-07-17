@@ -33,7 +33,7 @@ public class NewsService {
         return Newsrepository.findById(id);
     }
 
-    public News create(News news, String username) {
+    public News create(@NonNull News news, String username) {
         news.setReportedBy(username);
         return Newsrepository.save(news);
     }

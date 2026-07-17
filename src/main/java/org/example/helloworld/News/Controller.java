@@ -1,15 +1,13 @@
 package org.example.helloworld.News;
 
 import jakarta.annotation.security.PermitAll;
+import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -46,7 +44,7 @@ public class Controller {
 
     @PreAuthorize("hasAnyRole('REPORTER','EDITOR')")
     @PostMapping
-    public ResponseEntity<News> create(@RequestBody News news, Authentication auth) {
+    public ResponseEntity<News> create(@RequestBody News news, @NonNull Authentication auth) {
         return ResponseEntity.status(HttpStatus.CREATED)
                 .body(newsService.create(news, auth.getName()));
     }

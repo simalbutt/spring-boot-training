@@ -17,6 +17,7 @@ public class user {
     private String username;
     private String password;
     private String Role;
+    private String token;
 
     @Column(name = "created_at")
     private LocalDateTime createdAt;
