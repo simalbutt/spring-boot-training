@@ -1,9 +1,9 @@
 package org.example.helloworld.user;
 
-import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import java.util.Optional;
 import java.util.UUID;
@@ -12,21 +12,38 @@ import java.util.UUID;
 public class UserService implements UserDetailsService {
 
     private final UserRepository userRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    public UserService(UserRepository userRepository) {
+    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
+        this.passwordEncoder=passwordEncoder;
     }
 
     @Override
     public UserDetails loadUserByUsername(String username)
             throws UsernameNotFoundException {
-        Optional<user> user = userRepository.findByUsername(username);
+        Optional<User> user = userRepository.findByUsername(username);
         if (user.isEmpty()) {
             throw new UsernameNotFoundException(username);
         }
-        return User.withUsername(username).password(user.get().getPassword())
+        return org.springframework.security.core.userdetails.User.withUsername(username).password(user.get().getPassword())
                 .authorities("ROLE_" + user.get().getRole()).build();
 
+    }
+
+    public User findOrCreateUser(String username, String role) {
+
+        return userRepository.findByUsername(username)
+                .orElseGet(() -> {
+
+                    User newUser = new User();
+
+                    newUser.setUsername(username);
+                    newUser.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
+                    newUser.setRole(role.replace("ROLE_", ""));
+
+                    return userRepository.save(newUser);
+                });
     }
 
 //    public  user generateToken(String username) {

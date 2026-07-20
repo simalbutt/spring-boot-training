@@ -1,12 +1,15 @@
 package org.example.helloworld.user;
 
+import com.fasterxml.jackson.core.Base64Variant;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import javax.crypto.SecretKey;
 import java.util.Date;
+import java.util.UUID;
 
 @Service
 public class JwtService {
@@ -25,7 +28,6 @@ public class JwtService {
                 secret.getBytes()
         );
 
-
         return Jwts.builder()
                 .subject(username)
                 .claim("role", role)
@@ -39,4 +41,6 @@ public class JwtService {
                 .signWith(key)
                 .compact();
     }
+
+
 }

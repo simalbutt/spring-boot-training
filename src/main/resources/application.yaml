@@ -10,9 +10,21 @@ spring:
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.xml
 
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: ${GOOGLE_CLIENT_ID}
+            client-secret: ${GOOGLE_CLIENT_SECRET}
+            scope:
+              - openid
+              - profile
+              - email
+
 
 jwt:
-  secret: mysecretkeymysecretkeymysecretkey123456
+  secret: ${JWT_SECRET}
 
   #  security:
   #    user:
