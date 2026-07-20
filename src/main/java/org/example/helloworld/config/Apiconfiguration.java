@@ -15,7 +15,7 @@ import org.springframework.context.annotation.Configuration;
         name = "BearerAuth",
         type = SecuritySchemeType.HTTP,
         scheme = "bearer",
-        bearerFormat = "UUID"
+        bearerFormat = "JWT"
 )
 @Configuration
 public class Apiconfiguration {

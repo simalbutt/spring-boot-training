@@ -29,18 +29,19 @@ public class UserService implements UserDetailsService {
 
     }
 
-    public  user generateToken(String username) {
-        user user1= userRepository.findByUsername(username)
-                .orElseThrow(() -> new UsernameNotFoundException(username));
-        user1.setToken(UUID.randomUUID().toString());
-        return userRepository.save(user1);
-    }
+//    public  user generateToken(String username) {
+//        user user1= userRepository.findByUsername(username)
+//                .orElseThrow(() -> new UsernameNotFoundException(username));
+//        user1.setToken(UUID.randomUUID().toString());
+//        return userRepository.save(user1);
+//    }
+//
+//    public user findByToken(String token) {
+//        Optional<user> user = userRepository.findByToken(token);
+//        if(user.isEmpty()) {
+//            throw new UsernameNotFoundException(token);
+//        }
+//        return user.get();
+//    }
 
-    public user findByToken(String token) {
-        Optional<user> user = userRepository.findByToken(token);
-        if(user.isEmpty()) {
-            throw new UsernameNotFoundException(token);
-        }
-        return user.get();
-    }
 }

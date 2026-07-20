@@ -7,14 +7,18 @@ spring:
     hibernate:
       ddl-auto: none
 
-#  security:
-#    user:
-#      name: reporter
-#      password: reporter
-#      roles: REPORTER
-
   liquibase:
     change-log: classpath:db/changelog/db.changelog-master.xml
+
+
+jwt:
+  secret: mysecretkeymysecretkeymysecretkey123456
+
+  #  security:
+  #    user:
+  #      name: reporter
+  #      password: reporter
+  #
 
 server:
   port: 8081
