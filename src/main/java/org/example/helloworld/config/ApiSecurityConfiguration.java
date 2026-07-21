@@ -10,6 +10,7 @@ import org.springframework.security.config.annotation.method.configuration.Enabl
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
@@ -18,7 +19,6 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
-
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
@@ -32,9 +32,10 @@ public class ApiSecurityConfiguration {
 
     private final JwtService jwtService;
     private final UserService userService;
-    public ApiSecurityConfiguration(JwtService jwtService, UserService userService ) {
+
+    public ApiSecurityConfiguration(JwtService jwtService, UserService userService) {
         this.jwtService = jwtService;
-        this.userService=userService;
+        this.userService = userService;
     }
 
     @Bean
@@ -47,6 +48,7 @@ public class ApiSecurityConfiguration {
 //              .requestMatchers(HttpMethod.DELETE, "/api/v1/news/**").hasAnyRole("editor")
 //              .requestMatchers(HttpMethod.PUT, "/api/v1/news/**").hasAnyRole("reporter")
                         .anyRequest().authenticated())
+
                 //for custom token authenticaton
 //                .formLogin(config -> config.successHandler((request, response, authentication) -> {
 //                    user user = userService.generateToken(authentication.getName());
@@ -56,23 +58,35 @@ public class ApiSecurityConfiguration {
                 .formLogin(config -> config.successHandler(
                                 (request, response, authentication) -> {
                                     UserDetails user = (UserDetails) authentication.getPrincipal();
+                                    assert user != null;
                                     String token = jwtService.generateToken(user.getUsername(),
-                                                    user.getAuthorities().iterator().next().getAuthority());
+                                            user.getAuthorities().iterator().next().getAuthority());
                                     response.setContentType("application/json");
-                                    response.getWriter().write("{\"access_token\":\"" + token + "\"}");}
-                        )
-                )
-
-                .oauth2Login(oauth -> oauth.successHandler(
-                                (request,response,authentication)-> {
-                                    OAuth2User googleUser = (OAuth2User) authentication.getPrincipal();
-                                    String username = googleUser.getAttribute("given_name");
-                                    userService.findOrCreateUser(username, "ROLE_REPORTER");
-                                    String token = jwtService.generateToken(username, "ROLE_REPORTER");
                                     response.getWriter().write("{\"access_token\":\"" + token + "\"}");
                                 }
                         )
                 )
+
+                .oauth2Login(oauth -> oauth.successHandler((request, response, authentication) -> {
+
+                            OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();
+
+                            OAuth2AuthenticationToken token = (OAuth2AuthenticationToken) authentication;
+                            String provider = token.getAuthorizedClientRegistrationId();
+                            String username;
+                            if (provider.equals("google")) {
+                                username = oauthUser.getAttribute("given_name");
+                            } else if (provider.equals("github")) {
+                                username = oauthUser.getAttribute("login");
+                            } else {
+                                throw new RuntimeException("Unsupported provider");
+                            }
+                            userService.findOrCreateUser(username, "ROLE_REPORTER");
+                            String jwt = jwtService.generateToken(username, "ROLE_REPORTER");
+                            response.setContentType("application/json");
+                            response.getWriter().write("{\"access_token\":\"" + jwt + "\"}");
+                        }
+                ))
                 .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
 //                .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(config -> config.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
