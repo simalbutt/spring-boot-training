@@ -23,9 +23,9 @@
                              unique="true"/>
             </column>
 
-<!--            <column name="token" type="VARCHAR(255)">-->
-<!--                <constraints  unique="true"/>-->
-<!--            </column>-->
+            <column name="token" type="VARCHAR(255)">
+                <constraints  unique="true"/>
+            </column>
 
             <column name="password" type="VARCHAR(255)">
                 <constraints nullable="false"/>

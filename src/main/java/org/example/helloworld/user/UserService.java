@@ -16,7 +16,7 @@ public class UserService implements UserDetailsService {
 
     public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
-        this.passwordEncoder=passwordEncoder;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @Override
@@ -31,34 +31,18 @@ public class UserService implements UserDetailsService {
 
     }
 
-    public User findOrCreateUser(String username, String role) {
-
-        return userRepository.findByUsername(username)
-                .orElseGet(() -> {
-
-                    User newUser = new User();
-
-                    newUser.setUsername(username);
-                    newUser.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
-                    newUser.setRole(role.replace("ROLE_", ""));
-
-                    return userRepository.save(newUser);
-                });
+    public User findOrCreateUser(String username) {
+        Optional<User> optionalUser = userRepository.findByUsername(username);
+        User user;
+        if (optionalUser.isPresent()) {
+            user = optionalUser.get();
+        } else {
+            user = new User();
+            user.setUsername(username);
+            user.setPassword(passwordEncoder.encode(UUID.randomUUID().toString()));
+            user.setRole("ROLE_REPORTER");
+        }
+        user.setToken(UUID.randomUUID().toString());
+        return userRepository.save(user);
     }
-
-//    public  user generateToken(String username) {
-//        user user1= userRepository.findByUsername(username)
-//                .orElseThrow(() -> new UsernameNotFoundException(username));
-//        user1.setToken(UUID.randomUUID().toString());
-//        return userRepository.save(user1);
-//    }
-//
-//    public user findByToken(String token) {
-//        Optional<user> user = userRepository.findByToken(token);
-//        if(user.isEmpty()) {
-//            throw new UsernameNotFoundException(token);
-//        }
-//        return user.get();
-//    }
-
 }

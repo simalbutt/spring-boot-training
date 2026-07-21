@@ -1,41 +1,24 @@
 package org.example.helloworld.config;
 
-import org.example.helloworld.user.JwtService;
-import org.example.helloworld.user.UserService;
-import org.springframework.beans.factory.annotation.Value;
+import org.example.helloworld.Security.ApiSecurityService;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
-import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.security.oauth2.jwt.JwtDecoder;
-import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.csrf.CookieCsrfTokenRepository;
 import org.springframework.security.web.csrf.CsrfTokenRequestAttributeHandler;
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
 
 @Configuration
 @EnableMethodSecurity
 public class ApiSecurityConfiguration {
 
-    @Value("${jwt.secret}")
-    private String jwtSecret;
+    public final ApiSecurityService securityService;
 
-
-    private final JwtService jwtService;
-    private final UserService userService;
-
-    public ApiSecurityConfiguration(JwtService jwtService, UserService userService) {
-        this.jwtService = jwtService;
-        this.userService = userService;
+    public ApiSecurityConfiguration(ApiSecurityService securityService) {
+        this.securityService=securityService;
     }
 
     @Bean
@@ -44,92 +27,27 @@ public class ApiSecurityConfiguration {
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/oauth2/**", "/login/**").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/v1/news", "/api/v1/news/**").permitAll()
-//              .requestMatchers(HttpMethod.POST, "/api/v1/news", "/api/v1/news/**").hasAnyRole("reporter", "editor")
-//              .requestMatchers(HttpMethod.DELETE, "/api/v1/news/**").hasAnyRole("editor")
-//              .requestMatchers(HttpMethod.PUT, "/api/v1/news/**").hasAnyRole("reporter")
                         .anyRequest().authenticated())
-
-                //for custom token authenticaton
-//                .formLogin(config -> config.successHandler((request, response, authentication) -> {
-//                    user user = userService.generateToken(authentication.getName());
-//                    response.setContentType("application/json");
-//                    response.getWriter().write("{\"access_token\":\"" + user.getToken() + "\"}");
-//                }))
-                .formLogin(config -> config.successHandler(
-                                (request, response, authentication) -> {
-                                    UserDetails user = (UserDetails) authentication.getPrincipal();
-                                    assert user != null;
-                                    String token = jwtService.generateToken(user.getUsername(),
-                                            user.getAuthorities().iterator().next().getAuthority());
-                                    response.setContentType("application/json");
-                                    response.getWriter().write("{\"access_token\":\"" + token + "\"}");
+                .formLogin(config -> config.successHandler((request, response, authentication) -> {
+                                    try {
+                                        securityService.onAuthenticationSuccessForm(request,response,authentication);
+                                    } catch (Exception e) {
+                                        throw new RuntimeException(e);
+                                    }
                                 }
                         )
                 )
-
                 .oauth2Login(oauth -> oauth.successHandler((request, response, authentication) -> {
-
-                            OAuth2User oauthUser = (OAuth2User) authentication.getPrincipal();
-
-                            OAuth2AuthenticationToken token = (OAuth2AuthenticationToken) authentication;
-                            String provider = token.getAuthorizedClientRegistrationId();
-                            String username;
-                            if (provider.equals("google")) {
-                                username = oauthUser.getAttribute("given_name");
-                            } else if (provider.equals("github")) {
-                                username = oauthUser.getAttribute("login");
-                            } else {
-                                throw new RuntimeException("Unsupported provider");
-                            }
-                            userService.findOrCreateUser(username, "ROLE_REPORTER");
-                            String jwt = jwtService.generateToken(username, "ROLE_REPORTER");
-                            response.setContentType("application/json");
-                            response.getWriter().write("{\"access_token\":\"" + jwt + "\"}");
+                        try {
+                            securityService.onAuthenticationSuccessOauth(request,response,authentication);
+                        } catch (Exception e) {
+                            throw new RuntimeException(e);
                         }
-                ))
+                }))
                 .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
-//                .csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(config -> config.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-                //for the custom token authentication
-
-//                .oauth2ResourceServer(config -> config
-//                        .opaqueToken(opaque -> opaque.introspector(token -> {
-//                                    user user = userService.findByToken(token);
-//                                    return new DefaultOAuth2AuthenticatedPrincipal(
-//                                            Map.of("sub", user.getUsername()),
-//                                            AuthorityUtils.createAuthorityList(
-//                                                    Arrays.stream(user.getRole().split(","))
-//                                                            .map(role -> "ROLE_" + role)
-//                                                            .toArray(String[]::new)
-//                                            )
-//                                    );
-//                                })
-//                        )
-//                );
-                .oauth2ResourceServer(config ->
-                        config.jwt(jwt -> jwt.jwtAuthenticationConverter(jwtAuthenticationConverter())));
+                .oauth2ResourceServer(config -> config
+                        .opaqueToken(config2-> config2.introspector(securityService::verify)));
         return http.build();
-    }
-
-    @Bean
-    public JwtDecoder jwtDecoder() {
-        SecretKey key = new SecretKeySpec(jwtSecret.getBytes(), "HmacSHA256");
-
-        return NimbusJwtDecoder.withSecretKey(key).build();
-    }
-
-    @Bean
-    JwtAuthenticationConverter jwtAuthenticationConverter() {
-
-        JwtGrantedAuthoritiesConverter converter = new JwtGrantedAuthoritiesConverter();
-
-        converter.setAuthoritiesClaimName("role");
-        converter.setAuthorityPrefix("");
-        JwtAuthenticationConverter jwtConverter = new JwtAuthenticationConverter();
-        jwtConverter.setJwtGrantedAuthoritiesConverter(converter);
-
-
-        return jwtConverter;
     }
 }
