@@ -63,7 +63,8 @@ management:
 logging:
   level:
     sql: debug
-    org.springframework.security: debug
+#    root: INFO
+#    org.springframework.security: info
 
 app:
   message:

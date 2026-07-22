@@ -3,6 +3,7 @@ package org.example.helloworld.Security;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.extern.slf4j.Slf4j;
 import org.example.helloworld.user.User;
 import org.jspecify.annotations.NonNull;
 import org.springframework.security.core.Authentication;
@@ -20,8 +21,10 @@ import java.security.KeyPairGenerator;
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
 import java.time.Instant;
+import java.util.Base64;
 import java.util.Map;
 
+@Slf4j
 @Service
 public class ApiSecurityService {
     private final UserService userService;
@@ -42,7 +45,13 @@ public class ApiSecurityService {
                         (RSAPublicKey) keyPair.getPublic())
                 .signatureAlgorithm(this.jwtAlgorithm)
                 .build();
+        String pem = "-----BEGIN PUBLIC KEY-----\n" +
+                Base64.getMimeEncoder(64, "\n".getBytes())
+                        .encodeToString(keyPair.getPublic().getEncoded()) +
+                "\n-----END PUBLIC KEY-----";
+        System.out.println(pem);
     }
+
 
     public void generateToken(@NonNull HttpServletResponse res, @NonNull User user ) throws Exception{
         res.setContentType("application/json");

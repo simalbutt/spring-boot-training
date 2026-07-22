@@ -1,6 +1,7 @@
 package org.example.helloworld.config;
 
 import org.example.helloworld.Security.ApiSecurityService;
+import org.jspecify.annotations.NonNull;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -18,11 +19,11 @@ public class ApiSecurityConfiguration {
     public final ApiSecurityService securityService;
 
     public ApiSecurityConfiguration(ApiSecurityService securityService) {
-        this.securityService=securityService;
+        this.securityService = securityService;
     }
 
     @Bean
-    public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
+    public SecurityFilterChain filterChain(@NonNull HttpSecurity http) throws Exception {
         http.authorizeHttpRequests(config -> config
                         .requestMatchers("/swagger-ui/**", "/v3/api-docs/**").permitAll()
                         .requestMatchers("/oauth2/**", "/login/**").permitAll()
@@ -30,7 +31,7 @@ public class ApiSecurityConfiguration {
                         .anyRequest().authenticated())
                 .formLogin(config -> config.successHandler((request, response, authentication) -> {
                                     try {
-                                        securityService.onAuthenticationSuccessForm(request,response,authentication);
+                                        securityService.onAuthenticationSuccessForm(request, response, authentication);
                                     } catch (Exception e) {
                                         throw new RuntimeException(e);
                                     }
@@ -38,16 +39,16 @@ public class ApiSecurityConfiguration {
                         )
                 )
                 .oauth2Login(oauth -> oauth.successHandler((request, response, authentication) -> {
-                        try {
-                            securityService.onAuthenticationSuccessOauth(request,response,authentication);
-                        } catch (Exception e) {
-                            throw new RuntimeException(e);
-                        }
+                    try {
+                        securityService.onAuthenticationSuccessOauth(request, response, authentication);
+                    } catch (Exception e) {
+                        throw new RuntimeException(e);
+                    }
                 }))
                 .csrf(csrf -> csrf.csrfTokenRepository(CookieCsrfTokenRepository.withHttpOnlyFalse()).csrfTokenRequestHandler(new CsrfTokenRequestAttributeHandler()))
                 .sessionManagement(config -> config.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .oauth2ResourceServer(config -> config
-                        .opaqueToken(config2-> config2.introspector(securityService::verify)));
+                        .opaqueToken(config2 -> config2.introspector(securityService::verify)));
         return http.build();
     }
 }
