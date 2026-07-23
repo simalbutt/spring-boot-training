@@ -7,6 +7,8 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
+import java.util.Objects;
 import java.util.Optional;
 
 @Service
@@ -18,7 +20,7 @@ public class NewsService {
         this.Newsrepository = NewsRepository;
     }
 
-    public Page<News> FindAll(int page, int size) {
+    public Page<News> findAll(int page, int size) {
         if (size <= 0) {
             size = 1;
         }
@@ -33,18 +35,23 @@ public class NewsService {
         return Newsrepository.findById(id);
     }
 
-    public News create(@NonNull News news, String username) {
+    public NewsDto create(@NonNull NewsDto dto, String username) {
+        News news = new News();
+        news.setTitle(dto.getTitle());
+        news.setContent(dto.getContent());
         news.setReportedBy(username);
-        return Newsrepository.save(news);
+        news.setCreatedDate(LocalDateTime.now());
+        News savedNews = Newsrepository.save(news);
+        return NewsDto.from(savedNews);
     }
 
-    public News update(long id, @NonNull News news, @NonNull Authentication auth) {
+    public NewsDto update(long id, @NonNull NewsDto news, @NonNull Authentication auth) {
         News new1 = Newsrepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("News not found"));
 
         boolean isEditor = auth.getAuthorities()
                 .stream()
-                .anyMatch(role -> role.getAuthority().equals("ROLE_EDITOR"));
+                .anyMatch(role -> Objects.equals(role.getAuthority(), "ROLE_EDITOR"));
         boolean isOwner = new1.getReportedBy()
                 .equals(auth.getName());
         if (!isEditor && !isOwner) {
@@ -55,8 +62,8 @@ public class NewsService {
 
         new1.setTitle(news.getTitle());
         new1.setContent(news.getContent());
-
-        return Newsrepository.save(new1);
+        Newsrepository.save(new1);
+        return NewsDto.from(new1);
     }
 
     public void deleteById(Long id) {
