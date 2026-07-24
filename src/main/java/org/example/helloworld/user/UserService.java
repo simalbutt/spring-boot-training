@@ -1,5 +1,6 @@
 package org.example.helloworld.user;
 
+import org.springframework.cache.annotation.Cacheable;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -22,8 +23,7 @@ public class UserService implements UserDetailsService {
     @Override
     public UserDetails loadUserByUsername(String username)
             throws UsernameNotFoundException {
-        Optional<User> user = userRepository.findByUsername2(username);
-        System.out.println("This appears on a new line.");
+        Optional<User> user = userRepository.findByUsername(username);
         if (user.isEmpty()) {
             throw new UsernameNotFoundException(username);
         }
@@ -33,8 +33,7 @@ public class UserService implements UserDetailsService {
     }
 
     public User findOrCreateUser(String username) {
-        Optional<User> optionalUser = userRepository.findByUsername1(username);
-        System.out.println("This");
+        Optional<User> optionalUser = userRepository.findByUsername(username);
         User user;
         if (optionalUser.isPresent()) {
             user = optionalUser.get();
@@ -46,5 +45,15 @@ public class UserService implements UserDetailsService {
         }
         user.setToken(UUID.randomUUID().toString());
         return userRepository.save(user);
+    }
+
+    @Cacheable(cacheNames = "user")
+    public User findByUsername(String username) {
+        System.out.println("called");
+
+        User user = userRepository.findByUsername(username)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        return user;
     }
 }
