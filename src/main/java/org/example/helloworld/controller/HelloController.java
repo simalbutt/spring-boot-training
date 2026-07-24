@@ -1,5 +1,6 @@
 package org.example.helloworld.controller;
 
+import org.example.helloworld.News.NewsService;
 import org.example.helloworld.user.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -15,9 +16,13 @@ public class HelloController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private NewsService newsService;
+
     @GetMapping("/")
     public String hello() {
         userService.findByUsername("reporter");
+        newsService.report();
         return welcomeMessage;
     }
 }

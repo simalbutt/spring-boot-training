@@ -1,8 +1,11 @@
 package org.example.helloworld.News;
 
+import lombok.extern.slf4j.Slf4j;
 import org.jspecify.annotations.NonNull;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.scheduling.annotation.Async;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
@@ -11,6 +14,7 @@ import java.time.LocalDateTime;
 import java.util.Objects;
 import java.util.Optional;
 
+@Slf4j
 @Service
 public class NewsService {
 
@@ -70,4 +74,18 @@ public class NewsService {
         Newsrepository.deleteById(id);
     }
 
+    @Async
+    public void report()
+    {
+        for(News news: Newsrepository.findAll()){
+            log.info("News: {}, {}, {}",news.getTitle(),news.getContent(),news.getReportedBy());
+        }
+    }
+
+    @Scheduled(fixedRate = 5000)
+    public void printMessage() {
+        log.info("Scheduler executed at {}", LocalDateTime.now());
+    }
 }
+
+

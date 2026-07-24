@@ -8,6 +8,8 @@ import io.swagger.v3.oas.annotations.security.SecurityScheme;
 import org.springframework.cache.annotation.EnableCaching;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.scheduling.annotation.EnableAsync;
+import org.springframework.scheduling.annotation.EnableScheduling;
 import org.springframework.security.crypto.factory.PasswordEncoderFactories;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
@@ -22,7 +24,9 @@ import org.springframework.security.crypto.password.PasswordEncoder;
         bearerFormat = "JWT"
 )
 @EnableCaching
+@EnableAsync
 @Configuration
+@EnableScheduling
 public class ApiConfiguration {
     @Bean
     public PasswordEncoder passwordEncoder(){
