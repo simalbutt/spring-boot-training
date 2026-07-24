@@ -29,6 +29,12 @@
     <properties>
         <java.version>25</java.version>
         <datasource-micrometer.version>2.2.1</datasource-micrometer.version>
+        <sonar.projectKey>helloworld</sonar.projectKey>
+        <sonar.projectName>helloworld</sonar.projectName>
+        <sonar.host.url>http://localhost:9000</sonar.host.url>
+        <sonar.coverage.jacoco.xmlReportPaths>
+            target/site/jacoco/jacoco.xml
+        </sonar.coverage.jacoco.xmlReportPaths>
     </properties>
 
     <dependencies>
@@ -293,8 +299,11 @@
                 </configuration>
             </plugin>
 
-
-
+            <plugin>
+                <groupId>org.sonarsource.scanner.maven</groupId>
+                <artifactId>sonar-maven-plugin</artifactId>
+                <version>5.1.0.4751</version>
+            </plugin>
 
         </plugins>
     </build>

@@ -100,7 +100,7 @@ public class NewsApiTests {
 
 
 
-    private BearerTokenAuthentication editorAuthentication() {
+    private @NonNull BearerTokenAuthentication editorAuthentication() {
 
         DefaultOAuth2AuthenticatedPrincipal principal =
                 new DefaultOAuth2AuthenticatedPrincipal(
